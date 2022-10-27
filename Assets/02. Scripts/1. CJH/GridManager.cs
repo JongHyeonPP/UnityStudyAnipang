@@ -8,14 +8,15 @@ public class GridManager : MonoBehaviour
     public GridTable gt;
     public _GridSettingValue values;
 
+    //그리드 배치(버튼으로 임시 구현)
     public void tempBtn_New()
     {
         gt = new GridTable(this);
 
         GridLayoutGroup temp = values.BoardObject.GetComponent<GridLayoutGroup>();
         Vector2 tempV2 =  values.BoardObject.GetComponent<RectTransform>().sizeDelta;
+        //셀 사이즈= 전체 사이즈/배열 크기
         temp.cellSize = new Vector2( (tempV2.x/ values.inputList[0]), tempV2.y / values.inputList[1]);
-
         gt.newGrid(values.inputList[0], values.inputList[1]);
     }
 
@@ -30,6 +31,7 @@ public class GridManager : MonoBehaviour
     }
 }
 
+//UI에 대응되는 자료구조
 public class GridTable
 {
     int sizeX, sizeY;
@@ -40,9 +42,10 @@ public class GridTable
     {
         gm = _gm;
     }
-
+    //그리드, 배열 할당
     public void newGrid(int _sizeX, int _sizeY)
     {
+        //x,y 배열 크기
         sizeX = _sizeX;
         sizeY = _sizeY;
         gridTable = new Tile[sizeX, sizeY];
@@ -50,7 +53,9 @@ public class GridTable
         {
             for (int x = 0; x < sizeX; x++)
             {
+                //배열 당 타일 대응
                 gridTable[x, y] = new Tile();
+                //보드 하위에 타일 생성, 해당 SpriteRenender 세팅
                 gridTable[x, y].sprite = gm.instanceTile();
                 gridTable[x, y].set_Random(gm,new Vector2(x,y));
                 gridTable[x, y].sprite.transform.name += ", " + x + " / " + y;
@@ -289,13 +294,14 @@ public class GridTable
         //gridTable[x, y] = null;
     }
 }
-
+//배열로 구성되는 
 public class Tile
 {
     GridManager gm;
     public SpriteRenderer sprite;
     public int type;
     public Vector2 posV2;
+    //설명 필요
     public int ability;
     public int animation;
 
@@ -322,7 +328,7 @@ public class Tile
         posV2 = _posV2;
 
         int rand = Random.Range(0, gm.values.spriteList.Count);
-        sprite.sprite = gm.values.spriteList[rand];
+        sprite.sprite = gm.values.spriteList[rand];//과일 중 하나 세팅
         sprite.size = new Vector2(1, 1);
         type = rand;
 
