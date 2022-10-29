@@ -42,10 +42,12 @@ public class GameManager : MonoBehaviour
             timerFill.fillAmount = remainTime / 60f;
             if (remainTime >= 0)
             {
+                Debug.Log(timerFill.fillAmount);
                 remainTime -= 0.1f;
             }
             else
             {
+                Debug.Log("else");
                 yield break;
             }
             yield return new WaitForSeconds(0.1f);

@@ -1,28 +1,41 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SocialPlatforms.Impl;
 using UnityEngine.UI;
+using static UnityEngine.GraphicsBuffer;
 
 public class GridManager : MonoBehaviour
 {
     public GridTable gt;
     public _GridSettingValue values;
 
-    //그리드 배치(버튼으로 임시 구현)
     public void tempBtn_New()
     {
         gt = new GridTable(this);
 
         GridLayoutGroup temp = values.BoardObject.GetComponent<GridLayoutGroup>();
         Vector2 tempV2 =  values.BoardObject.GetComponent<RectTransform>().sizeDelta;
-        //셀 사이즈= 전체 사이즈/배열 크기
-        temp.cellSize = new Vector2( (tempV2.x/ values.inputList[0]), tempV2.y / values.inputList[1]);
-        gt.newGrid(values.inputList[0], values.inputList[1]);
+        temp.cellSize = new Vector2( (tempV2.x/ 10), tempV2.y / 10);
+
+        gt.newGrid(10,10);
     }
 
-    public void tempBtn_Print()
+    public void tempBtn_TryMove()
     {
-        gt.print();
+        Tile target1 = gt.gridTable[values.getInput("Target1_x"), values.getInput("Target1_y")];
+        Tile target2 = gt.gridTable[values.getInput("Target2_x"), values.getInput("Target2_y")];
+
+        List<Tile> list = new List<Tile>();
+        List<Vector2> score = new List<Vector2>();
+
+        gt.TryMove(target1, target2, ref list, ref score);
+
+        for (int i = 0; i < list.Count; i++)
+        {
+            Debug.Log("target - " + list[i].posV2 + "\t score - " + score[i]);
+            list[i].sprite.transform.name += " // " + score[i];
+        }
     }
 
     public SpriteRenderer instanceTile()
@@ -31,21 +44,19 @@ public class GridManager : MonoBehaviour
     }
 }
 
-//UI에 대응되는 자료구조
 public class GridTable
 {
     int sizeX, sizeY;
-    Tile[,] gridTable;
+    public Tile[,] gridTable;
     GridManager gm;
 
     public GridTable(GridManager _gm)
     {
         gm = _gm;
     }
-    //그리드, 배열 할당
+
     public void newGrid(int _sizeX, int _sizeY)
     {
-        //x,y 배열 크기
         sizeX = _sizeX;
         sizeY = _sizeY;
         gridTable = new Tile[sizeX, sizeY];
@@ -53,9 +64,7 @@ public class GridTable
         {
             for (int x = 0; x < sizeX; x++)
             {
-                //배열 당 타일 대응
                 gridTable[x, y] = new Tile();
-                //보드 하위에 타일 생성, 해당 SpriteRenender 세팅
                 gridTable[x, y].sprite = gm.instanceTile();
                 gridTable[x, y].set_Random(gm,new Vector2(x,y));
                 gridTable[x, y].sprite.transform.name += ", " + x + " / " + y;
@@ -63,29 +72,19 @@ public class GridTable
         }
     }
         
-    public void print()
+    public bool TryMove(Tile target_1, Tile target_2, ref List<Tile> list, ref List<Vector2> score)
     {
-        Tile target1 = gridTable[gm.values.inputList[2], gm.values.inputList[3]];
-        Tile target2 = gridTable[gm.values.inputList[4], gm.values.inputList[5]];
-
-        List<Tile> list = new List<Tile>();
-        List<Vector2> score = new List<Vector2>();
-
-        swapTile(target1, target2);
-
-        checkTile_AnsAll(ref list,ref score);
-
-        for (int i = 0; i < list.Count; i++)
-        {
-            list[i].sprite.transform.name += " // " + score[i];
-        }
+        swapTile(target_1, target_2);
+ 
+        checkTile_AnsAll(ref list, ref score);
 
         if (list.Count != 0)
         {
-            swapTile(target1, target2);
-        }
-        
-        return;
+            swapTile(target_1, target_2);
+        }else
+            return true;
+
+        return false;
     }
 
     public void swapTile(Tile target_1, Tile target_2)
@@ -240,7 +239,7 @@ public class GridTable
         return returnValue - 1;
     }
 
-    bool checkTile_AnsAll(ref List<Tile> list, ref List<Vector2> score)
+    public bool checkTile_AnsAll(ref List<Tile> list, ref List<Vector2> score)
     {
         Vector2 temp;
 
@@ -260,7 +259,6 @@ public class GridTable
 
                 if(temp != Vector2.zero)
                 {
-                    Debug.Log("??");
                     list.Add(gridTable[x, y]);
                     score.Add(temp);
                 }
@@ -294,31 +292,26 @@ public class GridTable
         //gridTable[x, y] = null;
     }
 }
-//배열로 구성되는 
+
 public class Tile
 {
     GridManager gm;
     public SpriteRenderer sprite;
     public int type;
     public Vector2 posV2;
-    //설명 필요
     public int ability;
-    public int animation;
 
-    public void set_Value(int _type, Vector2 _posV2, int _ability, int _animation)
+    public void set_Value(int _type, Vector2 _posV2, int _ability)
     {
         type = _type;
         posV2 = _posV2;
         ability = _ability;
-        animation = _animation;
     }
 
     public void set_Tile(Tile target)
     {
         type = target.type;
         posV2 = target.posV2;
-        ability = target.ability;
-        animation = target.animation;
     }
 
     public void set_Random(GridManager _gm, Vector2 _posV2)
@@ -328,13 +321,11 @@ public class Tile
         posV2 = _posV2;
 
         int rand = Random.Range(0, gm.values.spriteList.Count);
-        sprite.sprite = gm.values.spriteList[rand];//과일 중 하나 세팅
+        sprite.sprite = gm.values.spriteList[rand];
         sprite.size = new Vector2(1, 1);
         type = rand;
 
         ability = 2;
-
-        animation = 3;
     }
 }
 
