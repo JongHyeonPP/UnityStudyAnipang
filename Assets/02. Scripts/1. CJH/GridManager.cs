@@ -48,12 +48,13 @@ public class GridManager : MonoBehaviour
             return;
         }
 
-
+        // 노드 떨어트리기 ( 12345A -> A12345 )
         for (int i = 0; i < list.Count; i++)
         {
             gt.fallingNode(list[i]);
         }
 
+        // 노드 변경 ( A12345 -> B12345)
         for (int i = 0; i < list.Count; i++)
         {
             list[i].set_Random(this);
@@ -82,6 +83,7 @@ public class GridTable
         sizeX = _sizeX;
         sizeY = _sizeY;
         gridTable = new Tile[sizeX, sizeY];
+
         for (int y = 0; y < sizeY; y++)
         {
             for (int x = 0; x < sizeX; x++)
@@ -96,27 +98,10 @@ public class GridTable
 
     public void fallingNode(Tile targetTile)
     {
-        Debug.Log(targetTile.sprite.name);
         for (int y = (int)targetTile.posV2.y-1 ; y >= 0; y--)
         {
-            Debug.Log((int)targetTile.posV2.x + " / " + y);
             swapTile(gridTable[(int)targetTile.posV2.x, y], gridTable[(int)targetTile.posV2.x, y+1]);
         }
-    }
-
-
-    public bool TryMove(Tile target_1, Tile target_2, ref List<Tile> list, ref List<Vector2> score)
-    {
-        swapTile(target_1, target_2);
-
-        checkTile_AnsAll(ref list, ref score);
-
-        if (list.Count == 0)
-        {
-            return false;
-        }
-
-        return true;
     }
 
     public void swapTile(Tile target_1, Tile target_2)
@@ -147,113 +132,6 @@ public class GridTable
             target_1.sprite.transform.SetSiblingIndex(temp2);
             target_2.sprite.transform.SetSiblingIndex(temp1);
         }
-    }
-
-    void tileInterAction(int x, int y)
-    {
-        ereaseTile(x, y);
-    }
-
-    void createTile(ref List<Tile> emptyList)
-    {
-        for (int i = 0; i < emptyList.Count; i++)
-        {
-            int x = (int)emptyList[i].posV2.x;
-            int y = (int)emptyList[i].posV2.y;
-
-            gridTable[x,y].set_Random(gm, new Vector2(x,y));
-        }
-    }
-
-    int checkTile_Pos(int pos_x,int pos_y)
-    {
-        int myType = gridTable[pos_x, pos_y].type;
-        List<Vector2> list_Cross = new List<Vector2>();
-        List<Vector2> list_Plus = new List<Vector2>();
-
-        for (int y = -1; y < 2; y++)
-        {
-            for (int x = -1; x < 2; x++)
-            {
-                if (isInBoard(pos_x + x, pos_y + y))
-                {
-                    if (myType == gridTable[pos_x + x, pos_y + y].type)
-                    {
-                        if(!(x == 0 && y==0))
-                        {
-                            if (x == 0 || y == 0)
-                            {
-                                list_Plus.Add(new Vector2(x, y));
-                            }
-                            else
-                            {
-                                list_Cross.Add(new Vector2(x, y));
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        if(list_Plus.Count > 1)
-        {
-            for (int std = 0; std < list_Plus.Count; std++)
-            {
-                for (int target = std + 1; target < list_Plus.Count; target++)
-                {
-                    bool x = (list_Plus[std].x * list_Plus[target].x == 0);
-                    bool y = (list_Plus[std].y * list_Plus[target].y == 0);
-
-                    if (!(x && y))
-                        return 1;
-                }
-            }
-        }
-
-        if (list_Cross.Count > 0)
-        {
-            for (int std = 0; std < list_Cross.Count; std++)
-            {
-                for (int target = std + 1; target < list_Cross.Count; target++)
-                {
-                    int check_1 = (int)(list_Cross[std].x * list_Cross[target].x);
-                    int check_2 = (int)(list_Cross[std].y * list_Cross[target].y);
-
-                    if (check_1 != check_2)
-                        return 2;
-
-                }
-
-                for (int target = 0; target < list_Plus.Count; target++)
-                {
-
-                    int check_1 = (int)(list_Cross[std].x * list_Plus[target].x);
-                    int check_2 = (int)(list_Cross[std].y * list_Plus[target].y);
-
-                    if (check_1 + check_2 == -1)
-                        gridTable[pos_x, pos_y].sprite.transform.name += "2";
-                }
-            }
-        }
-
-        if (list_Plus.Count > 0)
-        {
-            for (int std = 0; std < list_Plus.Count; std++)
-            {
-                int x = pos_x + (int)(list_Plus[std].x * -2);
-                int y = pos_y + (int)(list_Plus[std].y * -2);
-
-                if (isInBoard(x, y))
-                {
-                    if (gridTable[x, y].type == myType)
-                    {
-                        return 2;
-                    }    
-                }
-            }
-        }
-
-        return 0;
     }
 
     int checkTile_Ans(Tile targetTile, Vector2 std_V2)
@@ -323,13 +201,6 @@ public class GridTable
             return false;
 
         return true;
-    }
-
-    void ereaseTile(int x, int y)
-    {
-        Tile temp = gridTable[x, y];
-        gridTable[x, y].sprite.sprite = null;
-        //gridTable[x, y] = null;
     }
 }
 
