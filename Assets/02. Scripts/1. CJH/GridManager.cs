@@ -1,8 +1,11 @@
+using Newtonsoft.Json.Linq;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SocialPlatforms.Impl;
 using UnityEngine.UI;
+using UnityEngine.UIElements;
 using static UnityEngine.GraphicsBuffer;
 
 public class GridManager : MonoBehaviour
@@ -12,13 +15,19 @@ public class GridManager : MonoBehaviour
 
     public void tempBtn_New()
     {
+        Transform[] childList = values.BoardObject.GetComponentsInChildren<Transform>();
+        for (int i = 1; i < childList.Length; i++)
+        {
+            Destroy(childList[i].gameObject);
+        }
+
         gt = new GridTable(this);
 
         GridLayoutGroup temp = values.BoardObject.GetComponent<GridLayoutGroup>();
         Vector2 tempV2 =  values.BoardObject.GetComponent<RectTransform>().sizeDelta;
         temp.cellSize = new Vector2( (tempV2.x/ 10), tempV2.y / 10);
 
-        gt.newGrid(10,10);
+        gt.newGrid(values.getInput("Board_x"), values.getInput("Board_y"));
     }
 
     public void tempBtn_TryMove()
@@ -29,12 +38,25 @@ public class GridManager : MonoBehaviour
         List<Tile> list = new List<Tile>();
         List<Vector2> score = new List<Vector2>();
 
-        gt.TryMove(target1, target2, ref list, ref score);
+        gt.swapTile(target1, target2);
+
+        gt.checkTile_AnsAll(ref list, ref score);
+
+        if (list.Count == 0)
+        {
+            gt.swapTile(target1, target2);
+            return;
+        }
+
 
         for (int i = 0; i < list.Count; i++)
         {
-            Debug.Log("target - " + list[i].posV2 + "\t score - " + score[i]);
-            list[i].sprite.transform.name += " // " + score[i];
+            gt.fallingNode(list[i]);
+        }
+
+        for (int i = 0; i < list.Count; i++)
+        {
+            list[i].set_Random(this);
         }
     }
 
@@ -71,20 +93,30 @@ public class GridTable
             }
         }
     }
-        
+
+    public void fallingNode(Tile targetTile)
+    {
+        Debug.Log(targetTile.sprite.name);
+        for (int y = (int)targetTile.posV2.y-1 ; y >= 0; y--)
+        {
+            Debug.Log((int)targetTile.posV2.x + " / " + y);
+            swapTile(gridTable[(int)targetTile.posV2.x, y], gridTable[(int)targetTile.posV2.x, y+1]);
+        }
+    }
+
+
     public bool TryMove(Tile target_1, Tile target_2, ref List<Tile> list, ref List<Vector2> score)
     {
         swapTile(target_1, target_2);
- 
+
         checkTile_AnsAll(ref list, ref score);
 
-        if (list.Count != 0)
+        if (list.Count == 0)
         {
-            swapTile(target_1, target_2);
-        }else
-            return true;
+            return false;
+        }
 
-        return false;
+        return true;
     }
 
     public void swapTile(Tile target_1, Tile target_2)
@@ -96,8 +128,16 @@ public class GridTable
         }
 
         {
-            gridTable[(int)target_1.posV2.x, (int)target_1.posV2.y] = target_2;
-            gridTable[(int)target_2.posV2.x, (int)target_2.posV2.y] = target_1;
+            string name_1 = target_1.sprite.transform.name;
+            string name_2 = target_2.sprite.transform.name;
+
+            target_1.sprite.transform.name = name_2;
+            target_2.sprite.transform.name = name_1;
+
+            Tile temp = gridTable[(int)target_1.posV2.x, (int)target_1.posV2.y];
+            gridTable[(int)target_1.posV2.x, (int)target_1.posV2.y] = gridTable[(int)target_2.posV2.x, (int)target_2.posV2.y];
+            gridTable[(int)target_2.posV2.x, (int)target_2.posV2.y] = temp;
+
         }
 
         {
@@ -319,6 +359,18 @@ public class Tile
         gm = _gm;
 
         posV2 = _posV2;
+
+        int rand = Random.Range(0, gm.values.spriteList.Count);
+        sprite.sprite = gm.values.spriteList[rand];
+        sprite.size = new Vector2(1, 1);
+        type = rand;
+
+        ability = 2;
+    }
+
+    public void set_Random(GridManager _gm)
+    {
+        gm = _gm;
 
         int rand = Random.Range(0, gm.values.spriteList.Count);
         sprite.sprite = gm.values.spriteList[rand];
