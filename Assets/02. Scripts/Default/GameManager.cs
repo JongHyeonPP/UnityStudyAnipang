@@ -3,20 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class GameManager : MonoBehaviour
+public class GameManager : MonoBehaviour, IManager
 {
     static GameManager instance;//싱글턴 구현, 다른 오브젝트에서 호출 시 Managers mg = Managers.GetInstance();
     public bool gameover;
     public static GameManager GetInstance() { return instance; }
     private int Score { get; set; }//점수
-    private float remainTime = 60;
     public Image timerFill;
-    void Start()
-    {
-        Init();
-        StartCoroutine(StartTimer());
-    }
-    void Init()//게임 매니저 초기화
+    public void Init()//게임 매니저 초기화
     {
         if (instance == null)//인스턴스 배정이 돼있는가
         {
@@ -32,25 +26,11 @@ public class GameManager : MonoBehaviour
             DontDestroyOnLoad(temp);//씬 이동해도 사라지지 않도록 한다
             gameover = false;
             Score = 0;
-            remainTime = 60;
         }
     }
-    IEnumerator StartTimer()
+
+    public void Clear()
     {
-        while(true)
-        {
-            timerFill.fillAmount = remainTime / 60f;
-            if (remainTime >= 0)
-            {
-                Debug.Log(timerFill.fillAmount);
-                remainTime -= 0.1f;
-            }
-            else
-            {
-                Debug.Log("else");
-                yield break;
-            }
-            yield return new WaitForSeconds(0.1f);
-        }
+        throw new System.NotImplementedException();
     }
 }

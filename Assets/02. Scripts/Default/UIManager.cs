@@ -1,18 +1,17 @@
-ï»¿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.SceneManagement;
-public class ButtonManager : MonoBehaviour
+public class UIManager : MonoBehaviour, IManager
 {
-    public GameObject pausePopup;//ì¼ì‹œì •ì§€ íŒì—…
+    public GameObject pausePopup;//ÀÏ½ÃÁ¤Áö ÆË¾÷
     private bool isPaused = false;
     public GameObject musicButton;
     public GameObject soundButton;
     public bool musicOnOff = true;
     public bool soundOnOff = true;
-    public AudioSource bgmSource;
-    public void Pause()//ì¼ì‹œì •ì§€ on/off
+    public AudioSource audioSource;
+    public void Pause()//ÀÏ½ÃÁ¤Áö on/off
     {
         if (!isPaused)
         {
@@ -22,8 +21,9 @@ public class ButtonManager : MonoBehaviour
         {
             pausePopup.SetActive(false);
         }
+
     }
-    public void Quit()//ê²Œìž„í”Œë ˆì´->ë©”ì¸í™”ë©´
+    public void Quit()//°ÔÀÓÇÃ·¹ÀÌ->¸ÞÀÎÈ­¸é
     {
         SceneManager.LoadScene("Main");
     }
@@ -34,7 +34,7 @@ public class ButtonManager : MonoBehaviour
     public void ClickMusic()
     {
         SoundOnOff(musicButton, ref musicOnOff);
-        bgmSource.mute = !musicOnOff;
+        audioSource.mute = !musicOnOff;
     }
     public void ClickSound()
     {
@@ -42,14 +42,23 @@ public class ButtonManager : MonoBehaviour
     }
     private void SoundOnOff(GameObject button, ref bool onOff)
     {
-        if (onOff)//ì¼œì ¸ìžˆë‹¤->ëˆë‹¤
+        if (onOff)//ÄÑÁ®ÀÖ´Ù->²ö´Ù
         {
             button.transform.localPosition = new Vector3(-201f, 0, 0);
         }
-        else//êº¼ì ¸ìžˆë‹¤->í‚¨ë‹¤
+        else//²¨Á®ÀÖ´Ù->Å²´Ù
         {
             button.transform.localPosition = new Vector3(0, 0, 0);
         }
         onOff = !(onOff);
+    }
+    public void Init()
+    {
+    
+    }
+
+    public void Clear()
+    {
+        throw new System.NotImplementedException();
     }
 }
