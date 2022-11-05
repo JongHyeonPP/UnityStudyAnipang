@@ -5,7 +5,9 @@ using UnityEngine;
 
 public class _GridSettingValue : MonoBehaviour
 {
+    public bool IsDebug = true;
     public GameObject TileObject,BoardObject;
+    public Sprite RAINBOW;
     public List<Sprite> spriteList;
 
     public List<grid_Value> inputList;
