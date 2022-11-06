@@ -2,11 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Define : MonoBehaviour
+public class Define
 {
     public enum Sound
     {
-        Bgm,
+        BGM,
         Effect,
         MaxCount
     }

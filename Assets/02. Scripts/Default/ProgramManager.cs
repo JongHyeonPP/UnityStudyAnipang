@@ -6,17 +6,20 @@ public class ProgramManager : MonoBehaviour
 {
     public static ProgramManager p_instance;
     static ProgramManager Instance { get { Init(); return p_instance; } }
-    public SoundManager soundManager;
-    public UIManager uiManager;
-    public GameManager gameManager; 
+    private SoundManager soundManager;
+    private UIManager uiManager;
+    private GameManager gameManager; 
     public static SoundManager Sound { get { return Instance.soundManager; } }
     public static UIManager UI { get { return Instance.uiManager; } }
     public static GameManager Game { get { return Instance.gameManager; } }
     private void Awake()
     {
         Init();
+        Sound.Init();
+        Game.Init();
+        UI.Init();
     }
-    static void Init()
+    public static void Init()
     {
         // Instance 프로퍼티 get 시 호출되니까 또 여기서 Instance 쓰면 무한 루프 빠짐 주의
         if (p_instance == null)
@@ -48,6 +51,7 @@ public class ProgramManager : MonoBehaviour
             p_instance.gameManager = Instantiate(new GameObject("GameManager")).AddComponent<GameManager>();
             p_instance.gameManager.gameObject.transform.parent = p_instance.transform;
         }
+        
     }
 
     public void Clear()
