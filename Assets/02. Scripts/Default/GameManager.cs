@@ -5,15 +5,21 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
+<<<<<<< HEAD
     static GameManager instance;//싱글턴 구현, 다른 오브젝트에서 호출 시 Managers mg = Managers.GetInstance();
     public GridManager grid_M;
+=======
+    //private void Awake()
+    //{
+    //    Init();
+    //}
+>>>>>>> origin/main
     public bool gameover;
-    public static GameManager GetInstance() { return instance; }
     private int Score { get; set; }//점수
-    private float remainTime = 60;
     public Image timerFill;
-    void Start()
+    public void Init()//게임 매니저 초기화
     {
+<<<<<<< HEAD
         Init();
         //StartCoroutine(StartTimer());
 
@@ -62,6 +68,10 @@ public class GameManager : MonoBehaviour
             }
             yield return new WaitForSeconds(0.1f);
         }
+=======
+            gameover = false;
+            Score = 0;      
+>>>>>>> origin/main
     }
 
     public int itemMode = 0;
