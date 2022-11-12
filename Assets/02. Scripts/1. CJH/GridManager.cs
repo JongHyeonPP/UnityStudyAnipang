@@ -1,16 +1,10 @@
-using Newtonsoft.Json.Linq;
-using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.SocialPlatforms.Impl;
 using UnityEngine.UI;
-using UnityEngine.UIElements;
-using UnityEngine.XR;
-using static UnityEngine.GraphicsBuffer;
 
 public class GridManager : MonoBehaviour
 {
+    public GameManager gm;
     public GridTable gt;
     public _GridSettingValue values;
 
@@ -30,11 +24,13 @@ public class GridManager : MonoBehaviour
 
         gt.newGrid(values.getInput("Board_x"), values.getInput("Board_y"));
     }
-
-    public void tempBtn_TryMove()
+    
+    public void tempBtn_TryMove(int x1, int y1, int x2, int y2)
     {
-        Tile target1 = gt.gridTable[values.getInput("Target1_x"), values.getInput("Target1_y")];
-        Tile target2 = gt.gridTable[values.getInput("Target2_x"), values.getInput("Target2_y")];
+        Tile target1 = gt.gridTable[x1,y1];
+        Tile target2 = gt.gridTable[x2, y2];
+
+        target1.sprite.transform.position = target2.sprite.transform.position;
 
         List<Tile> list = new List<Tile>();
         List<Vector2> score = new List<Vector2>();
@@ -43,17 +39,11 @@ public class GridManager : MonoBehaviour
 
         gt.checkTile_AnsAll(ref list, ref score);
 
-        for (int i = 0; i < list.Count; i++)
-        {
-            list[i].sprite.name += score[i];
-        }
-
         if (list.Count == 0)
         {
             gt.swapTile(target1, target2);
             return;
         }
-
 
         for (int i = 0; i < list.Count; i++)
         {
@@ -65,9 +55,10 @@ public class GridManager : MonoBehaviour
             list[i].set_Random(this);
         }
     }
-    public void Item_BOMB()
+
+    public void Item_BOMB(int x,int y)
     {
-        Tile target1 = gt.gridTable[values.getInput("Target2_x"), values.getInput("Target2_y")];
+        Tile target1 = gt.gridTable[x, y];
 
         List<Tile> list = new List<Tile>();
         gt.searchTile_range(target1, ref list);
@@ -91,9 +82,10 @@ public class GridManager : MonoBehaviour
             }
         }
     }
-    public void Item_RAINBOW()
+
+    public void Item_RAINBOW(int x, int y)
     {
-        Tile target1 = gt.gridTable[values.getInput("Target1_x"), values.getInput("Target1_y")];
+        Tile target1 = gt.gridTable[x, y];
         List<Tile> list = new List<Tile>();
         gt.searchTile_type(target1.type, ref list);
 
@@ -102,6 +94,7 @@ public class GridManager : MonoBehaviour
             list[i].type = -1;
         }
     }
+
     public void Item_SPARK()
     {
         Tile target1 = gt.gridTable[values.getInput("Target1_x"), values.getInput("Target1_y")];
@@ -162,7 +155,7 @@ public class GridTable
                 gridTable[x, y] = new Tile();
                 gridTable[x, y].sprite = gm.instanceTile();
                 gridTable[x, y].set_Random(gm, new Vector2(x, y));
-                gridTable[x, y].sprite.transform.name += ", " + x + " / " + y;
+                gridTable[x, y].sprite.transform.name = x + "," + y;
             }
         }
     }
@@ -177,7 +170,7 @@ public class GridTable
         }
     }
 
-
+ 
     public bool TryMove(Tile target_1, Tile target_2, ref List<Tile> list, ref List<Vector2> score)
     {
         swapTile(target_1, target_2);
@@ -210,7 +203,6 @@ public class GridTable
             Tile temp = gridTable[(int)target_1.posV2.x, (int)target_1.posV2.y];
             gridTable[(int)target_1.posV2.x, (int)target_1.posV2.y] = gridTable[(int)target_2.posV2.x, (int)target_2.posV2.y];
             gridTable[(int)target_2.posV2.x, (int)target_2.posV2.y] = temp;
-
         }
 
         {
@@ -236,6 +228,7 @@ public class GridTable
             }
         }
     }
+
     public void searchTile_range(Tile targetTile, ref List<Tile> list)
     {
         int target_x;
@@ -248,12 +241,11 @@ public class GridTable
                 target_x = (int)targetTile.posV2.x + x;
                 target_y = (int)targetTile.posV2.y + y;
                 if (isInBoard(target_x, target_y))
-                    if (x*x *y*y != 16)
+                    if (x*x *y*y < 16)
                         list.Add(gridTable[target_x, target_y]);
             }
         }
     }
-
 
     int checkTile_Ans(Tile targetTile, Vector2 std_V2)
     {
